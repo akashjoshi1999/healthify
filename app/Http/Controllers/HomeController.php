@@ -23,8 +23,8 @@ class HomeController extends Controller
 
     public function filter(Request $request)
     {
-        // Extract filter inputs
-        $filters = $request->only(['user_id', 'year', 'month', 'day']);
+        // Extract filter inputs, including user_name for search
+        $filters = $request->only(['user_id', 'year', 'month', 'day', 'user_name']);
 
         $activities = $this->getUsersWithRanks($filters);
         $users = User::pluck('name', 'id')->toArray();
@@ -60,6 +60,12 @@ class HomeController extends Controller
         }
         if (!empty($filters['user_id'])) {
             $query->where('user_id', $filters['user_id']);
+        }
+
+        if (!empty($filters['user_name'])) {
+            $query->whereHas('user', function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['user_name'] . '%');
+            });
         }
 
         // Order by total points descending

@@ -78,17 +78,18 @@
                                     <option value="{{ $id }}" {{ request('user_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
                                 @endforeach
                             </select>
+                            {{-- <input type="text" name="user_name" value="{{ request('user_name') }}" placeholder="Search name" class="border rounded px-3 py-2" id="filter-search-name"> --}}
                         </div>
 
                         <!-- Buttons Group -->
                         <div class="flex gap-2 justify-center sm:justify-end">
                             <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700" id="filter-btn">Filter</button>
 
-                            @if(request()->filled(['month', 'year', 'day', 'user_id']))
+                            @if(request()->filled(['month', 'year', 'day', 'user_id', 'user_name']))
                                 <a href="{{ route('activities.filter') }}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 inline-flex items-center" id="clear-filter-btn">
                                     Clear Filter
                                 </a>
-                            @elseif(request()->filled('month') || request()->filled('year') || request()->filled('day') || request()->filled('user_id'))
+                            @elseif(request()->filled('month') || request()->filled('year') || request()->filled('day') || request()->filled('user_id') || request()->filled('user_name'))
                                 <a href="{{ route('activities.index') }}" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 inline-flex items-center" id="clear-filter-btn">
                                     Clear Filter
                                 </a>
