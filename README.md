@@ -86,3 +86,7 @@ Or use the "Recalculate" button in the UI.
 | Serve Application            | `php artisan serve`                                   |
 | Generate App Key             | `php artisan key:generate`                            |
 | Cache Routes & Config (Prod) | `php artisan route:cache && php artisan config:cache` |
+
+
+![image](https://github.com/user-attachments/assets/b7202a04-1bfc-405a-a1ff-b2561dc37d1b)
+
