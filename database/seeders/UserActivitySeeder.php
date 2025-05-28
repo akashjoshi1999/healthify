@@ -12,6 +12,6 @@ class UserActivitySeeder extends Seeder
      */
     public function run(): void
     {
-        UserActivity::factory()->count(100)->create();
+        UserActivity::factory()->count(20)->create();
     }
 }

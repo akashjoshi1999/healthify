@@ -10,15 +10,22 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
+        <!-- Toastr CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+
         <!-- Styles / Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <!-- jQuery + Toastr JS -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     </head>
     <body class="bg-gray-100 text-gray-800">
         <header class="bg-white shadow">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-center h-16 items-center">
                     <div class="flex-shrink-0">
-                        <a href="#" class="text-2xl font-bold text-indigo-600">
+                        <a href="/" class="text-2xl font-bold text-indigo-600">
                             Healthify
                         </a>
                     </div>
@@ -27,9 +34,12 @@
         </header>
 
         <div class="flex justify-center mt-12">
-            <button class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-semibold" id="recalculate-btn">
-            Recalculate
-            </button>
+            <form method="POST" action="{{ route('activities.recalculate') }}">
+                @csrf
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 font-semibold" id="recalculate-btn">
+                Recalculate
+                </button>
+            </form>
         </div>
         <main class="mt-8 flex justify-center">
             <div class="bg-white shadow rounded-lg p-8 w-full max-w-4xl">
@@ -50,7 +60,7 @@
 
                             <select name="year" class="border rounded px-3 py-2" id="filter-year">
                                 <option value="">Year</option>
-                                @for($y = now()->year; $y >= 2000; $y--)
+                                @for($y = now()->year; $y >= 2020; $y--)
                                     <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
                                 @endfor
                             </select>
@@ -122,5 +132,23 @@
             </div>
             </div>
         </main>
+        <script>
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "timeOut": "5000",
+                "positionClass": "toast-top-right"
+            };
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @elseif (session('error'))
+                toastr.error("{{ session('error') }}");
+            @elseif (session('warning'))
+                toastr.warning("{{ session('warning') }}");
+            @elseif (session('info'))
+                toastr.info("{{ session('info') }}");
+            @endif
+        </script>
+
     </body>
 </html>
