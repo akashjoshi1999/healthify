@@ -19,6 +19,7 @@ class UserActivity extends Model
     protected $fillable = [
         'user_id',
         'point',
+        'created_at',
     ];
 
     public function user()

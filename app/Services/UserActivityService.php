@@ -18,7 +18,7 @@ class UserActivityService
             UserActivity::create([
                 'user_id' => $userIds->random(),
                 'point' => 20,
-                'created_at' => $faker->dateTimeBetween('-5 years', 'now'),
+                'created_at' => $faker->dateTimeBetween('-3 year', 'now'),
             ]);
         }
     }

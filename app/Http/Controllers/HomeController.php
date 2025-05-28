@@ -6,14 +6,16 @@ use Illuminate\Http\Request;
 use App\Models\UserActivity;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Artisan;
 use App\Services\UserActivityService;
 
 class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $activities = $this->getActivitiesWithRank();
+        // Get users with aggregated points and ranks, no filters initially
+        $activities = $this->getUsersWithRanks();
+
+        // For user filter dropdown
         $users = User::pluck('name', 'id')->toArray();
 
         return view('welcome', compact('activities', 'users'));
@@ -21,20 +23,32 @@ class HomeController extends Controller
 
     public function filter(Request $request)
     {
+        // Extract filter inputs
         $filters = $request->only(['user_id', 'year', 'month', 'day']);
-        $activities = $this->getActivitiesWithRank($filters);
+
+        $activities = $this->getUsersWithRanks($filters);
         $users = User::pluck('name', 'id')->toArray();
 
         return view('welcome', compact('activities', 'users'));
     }
 
-    private function getActivitiesWithRank(array $filters = [])
+    /**
+     * Get aggregated user points with rank, applying optional filters.
+     *
+     * @param array $filters
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    private function getUsersWithRanks(array $filters = [])
     {
-        $query = UserActivity::with('user');
+        // Base query: group by user_id and sum points
+        $query = UserActivity::select(
+                    'user_id',
+                    DB::raw('SUM(point) as total_points'),
+                    DB::raw('MAX(created_at) as last_activity_date')
+                )
+                ->with('user')
+                ->groupBy('user_id');
 
-        if (!empty($filters['user_id'])) {
-            $query->where('user_id', $filters['user_id']);
-        }
         if (!empty($filters['year'])) {
             $query->whereYear('created_at', $filters['year']);
         }
@@ -44,29 +58,21 @@ class HomeController extends Controller
         if (!empty($filters['day'])) {
             $query->whereDay('created_at', $filters['day']);
         }
-
-        $activities = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->appends($filters);
-
-        $userRanks = $this->calculateUserRanks();
-
-        foreach ($activities as $activity) {
-            $activity->rank = $userRanks[$activity->user_id] ?? null;
+        if (!empty($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
         }
 
-        return $activities;
-    }
+        // Order by total points descending
+        $paginated = $query->orderByDesc('total_points')->paginate(10)->appends($filters);
 
-    private function calculateUserRanks()
-    {
-        return UserActivity::select('user_id', DB::raw('SUM(point) as total_points'))
-            ->groupBy('user_id')
-            ->orderByDesc('total_points')
-            ->get()
-            ->mapWithKeys(function ($item, $index) {
-                return [$item->user_id => $index + 1];
-            });
+        // Add rank attribute
+        $rankStart = ($paginated->currentPage() - 1) * $paginated->perPage();
+        $paginated->getCollection()->transform(function ($item, $index) use ($rankStart) {
+            $item->rank = $rankStart + $index + 1;
+            return $item;
+        });
+
+        return $paginated;
     }
 
     public function recalculate(Request $request, UserActivityService $service)

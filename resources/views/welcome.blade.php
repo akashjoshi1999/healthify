@@ -112,12 +112,17 @@
                 </thead>
                 <tbody id="activity-table-body">
                     @forelse ($activities as $key => $activity)
+                    @php
+                        // dd($activity);
+                    @endphp
                     <tr>
                         <td class="px-4 py-2 border-b text-center">{{ $activities->firstItem() + $key }}</td>
                         <td class="px-4 py-2 border-b text-center">{{ $activity->user->name }}</td>
                         <td class="px-4 py-2 border-b text-center">{{ $activity->rank }}</td>
-                        <td class="px-4 py-2 border-b text-center">{{ $activity->point }}</td>
-                        <td class="px-4 py-2 border-b text-center">{{ $activity->created_at->format('Y-m-d') }}</td>
+                        <td class="px-4 py-2 border-b text-center">{{ $activity->total_points }}</td>
+                        <td class="px-4 py-2 border-b text-center">
+                                {{ \Carbon\Carbon::parse($activity->last_activity_date)->format('Y-m-d') }}
+                        </td>
                     </tr>
                     @empty
                     <tr>
